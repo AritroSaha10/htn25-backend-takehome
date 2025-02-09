@@ -1,13 +1,22 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"database/sql"
+	"time"
 
+	"gorm.io/gorm"
+)
+
+// GORM model for a user. We aren't using gorm.Model so we can
+// add json tags to the fields it provides.
 type User struct {
-	gorm.Model
-	ID        uint    `json:"id"`
-	Name      string  `json:"name"`
-	Email     string  `json:"email"`
-	Phone     string  `json:"phone"`
-	BadgeCode *string `json:"badge_code"` // pointer to allow no badge code
-	Scans     []Scan  `json:"scans"`
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	Name      string         `json:"name"`
+	Email     string         `json:"email" gorm:"unique;not null"`
+	Phone     string         `json:"phone" gorm:"not null"`
+	BadgeCode sql.NullString `json:"badge_code"`
+	Scans     []Scan         `json:"scans"`
 }

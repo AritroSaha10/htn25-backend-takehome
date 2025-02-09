@@ -6,11 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
+// GORM model for a scan. We aren't using gorm.Model so we can
+// add json tags to the fields it provides.
 type Scan struct {
-	gorm.Model
-	ID               uint      `json:"id"`
-	ActivityName     string    `json:"activity_name"`
-	ActivityCategory string    `json:"activity_category"`
-	ScannedAt        time.Time `json:"scanned_at"`
-	UserID           uint      `json:"user_id"` // TODO: May want to adjust JSON output later
+	ID               uint           `json:"id" gorm:"primaryKey"`
+	CreatedAt        time.Time      `json:"-"`
+	UpdatedAt        time.Time      `json:"-"`
+	DeletedAt        gorm.DeletedAt `gorm:"index" json:"-"`
+	ActivityName     string         `json:"activity_name" gorm:"not null"`
+	ActivityCategory string         `json:"activity_category" gorm:"not null"`
+	ScannedAt        time.Time      `json:"scanned_at" gorm:"not null"`
+	UserID           uint           `json:"user_id" gorm:"not null"` // TODO: May want to adjust JSON output later
 }
