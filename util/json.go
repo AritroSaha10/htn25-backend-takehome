@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"encoding/json"
@@ -6,13 +6,9 @@ import (
 	"net/http"
 )
 
-const (
-	ISO8601 = "2006-01-02T15:04:05.99999"
-)
-
-// getJSONFromURL fetches a JSON object from a given URL and returns it as an
+// GetJSONFromURL fetches a JSON object from a given URL and returns it as an
 // interface.
-func getJSONFromURL(url string) (interface{}, error) {
+func GetJSONFromURL(url string) (interface{}, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch url: %w", err)

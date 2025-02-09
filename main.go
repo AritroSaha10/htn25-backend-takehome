@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/AritroSaha10/htn25-backend-takehome/lib"
 	"github.com/AritroSaha10/htn25-backend-takehome/model"
+	"github.com/AritroSaha10/htn25-backend-takehome/util"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -75,7 +75,7 @@ func importInitialData(db *gorm.DB) error {
 	if initDataURL == "" {
 		return fmt.Errorf("INITIAL_DATABASE_URL is not set")
 	}
-	initData, err := getJSONFromURL(initDataURL)
+	initData, err := util.GetJSONFromURL(initDataURL)
 	if err != nil {
 		return fmt.Errorf("failed to get initial data: %w", err)
 	}
@@ -100,16 +100,13 @@ func batchAddUsersFromRaw(db *gorm.DB, data interface{}) error {
 			user.Name = userData["name"].(string)
 			user.Email = userData["email"].(string)
 			user.Phone = userData["phone"].(string)
-			user.BadgeCode = sql.NullString{
-				String: userData["badge_code"].(string),
-				Valid:  userData["badge_code"].(string) != "",
-			}
+			user.BadgeCode = userData["badge_code"].(string)
 
 			// Parse scans from the user data
 			user.Scans = []model.Scan{}
 			for _, rawScan := range userData["scans"].([]interface{}) {
 				scanData := rawScan.(map[string]interface{})
-				scannedAt, err := time.Parse(ISO8601, scanData["scanned_at"].(string))
+				scannedAt, err := time.Parse(util.ISO8601, scanData["scanned_at"].(string))
 				if err != nil {
 					return fmt.Errorf("failed to parse scanned_at: %w", err)
 				}

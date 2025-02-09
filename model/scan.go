@@ -16,5 +16,5 @@ type Scan struct {
 	ActivityName     string         `json:"activity_name" gorm:"not null"`
 	ActivityCategory string         `json:"activity_category" gorm:"not null"`
 	ScannedAt        time.Time      `json:"scanned_at" gorm:"not null"`
-	UserID           uint           `json:"user_id" gorm:"not null"` // TODO: May want to adjust JSON output later
+	UserID           uint           `json:"-" gorm:"not null"`
 }
