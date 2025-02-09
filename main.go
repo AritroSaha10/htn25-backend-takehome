@@ -38,17 +38,9 @@ func main() {
 	db.AutoMigrate(&model.User{}, &model.Scan{})
 
 	// Import any new data from the initial data set
-	initDataURL := os.Getenv("INITIAL_DATABASE_URL")
-	if initDataURL == "" {
-		log.Fatal().Msg("INITIAL_DATABASE_URL is not set")
-	}
-	initData, err := getJSONFromURL(initDataURL)
+	err = importInitialData(db)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to get initial data")
-	}
-	err = batchAddUsersFromRaw(db, initData)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to add users from initial data")
+		log.Fatal().Err(err).Msg("failed to import initial data")
 	}
 
 	// Print out all users
@@ -57,6 +49,24 @@ func main() {
 	for _, user := range users {
 		log.Info().Any("user", user).Msg("user in db")
 	}
+}
+
+// importInitialData imports any new data from the initial data set.
+func importInitialData(db *gorm.DB) error {
+	// Import any new data from the initial data set
+	initDataURL := os.Getenv("INITIAL_DATABASE_URL")
+	if initDataURL == "" {
+		return fmt.Errorf("INITIAL_DATABASE_URL is not set")
+	}
+	initData, err := getJSONFromURL(initDataURL)
+	if err != nil {
+		return fmt.Errorf("failed to get initial data: %w", err)
+	}
+	err = batchAddUsersFromRaw(db, initData)
+	if err != nil {
+		return fmt.Errorf("failed to add users from initial data: %w", err)
+	}
+	return nil
 }
 
 // batchAddUsersFromRaw adds all users from a raw interface without creating duplicates. Duplicates are
