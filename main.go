@@ -3,15 +3,16 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/AritroSaha10/htn25-backend-takehome/lib"
 	"github.com/AritroSaha10/htn25-backend-takehome/model"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/rs/zerolog/pkgerrors"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -30,12 +31,10 @@ func main() {
 		log.Fatal().Err(err).Msg("failed to load environment variables")
 	}
 
-	// Configure database
-	db, err := gorm.Open(sqlite.Open("htn.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to connect database")
+	var db *gorm.DB
+	if db, err = lib.CreateNewDB(); err != nil {
+		log.Fatal().Err(err).Msg("failed to create database")
 	}
-	db.AutoMigrate(&model.User{}, &model.Scan{})
 
 	// Import any new data from the initial data set
 	err = importInitialData(db)
@@ -48,6 +47,24 @@ func main() {
 	db.Find(&users)
 	for _, user := range users {
 		log.Info().Any("user", user).Msg("user in db")
+	}
+
+	// Initialize and start server
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "development"
+	}
+	serv = CreateNewServer(db, port, env)
+	serv.MountHandlers()
+
+	log.Info().Str("port", port).Str("env", env).Msg("starting server")
+	err = http.ListenAndServe(":"+port, serv.Router)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to start server")
 	}
 }
 
