@@ -25,6 +25,7 @@ type User struct {
 	Scans     []Scan         `json:"scans"`
 }
 
+// UserUpdate represents the fields that can be updated for a user.
 type UserUpdate struct {
 	Name      string `json:"name"`
 	Email     string `json:"email"`
@@ -42,6 +43,7 @@ func (u *User) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// GetUsers gets all users from the database.
 func GetUsers(db *gorm.DB) ([]User, error) {
 	users := []User{}
 	res := db.Preload("Scans").Find(&users)
@@ -51,6 +53,7 @@ func GetUsers(db *gorm.DB) ([]User, error) {
 	return users, nil
 }
 
+// GetUserByID gets a user from the database by their ID.
 func GetUserByID(db *gorm.DB, id uint) (User, error) {
 	user := User{}
 	result := db.Preload("Scans", "user_id = ?", id).Limit(1).Find(&user, id)
@@ -63,6 +66,8 @@ func GetUserByID(db *gorm.DB, id uint) (User, error) {
 	return user, nil
 }
 
+// UpdateUserByID updates a user in the database by their ID, while enforcing certain
+// uniqueness constraints on the fields (ex. email, badge code).
 func UpdateUserByID(db *gorm.DB, id uint, userUpdate UserUpdate) (User, error) {
 	// Confirm the user exists
 	user := User{}

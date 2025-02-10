@@ -21,6 +21,7 @@ type Scan struct {
 	UserID           uint           `json:"-" gorm:"not null"`
 }
 
+// ScanAggregate represents the aggregate frequency of scans for a given activity name and category.
 type ScanAggregate struct {
 	ActivityName     string `json:"activity_name"`
 	ActivityCategory string `json:"activity_category"`
@@ -46,6 +47,7 @@ func (s *ScanAggregate) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// CreateScan creates a new scan in the database.
 func CreateScan(db *gorm.DB, scan *Scan) error {
 	scan.ScannedAt = time.Now()
 	if err := db.Create(&scan).Error; err != nil {
@@ -54,6 +56,7 @@ func CreateScan(db *gorm.DB, scan *Scan) error {
 	return nil
 }
 
+// GetScanAggregates gets the aggregate frequency of scans for a given activity name and category.
 func GetScanAggregates(db *gorm.DB, activityCategory *string, minFrequency *int, maxFrequency *int) ([]ScanAggregate, error) {
 	var aggregates []ScanAggregate
 	tx := db.

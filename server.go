@@ -26,6 +26,7 @@ type Server struct {
 	Environment string
 }
 
+// CreateNewServer creates a new server instance, which is used to serve the API.
 func CreateNewServer(db *gorm.DB, port string, environment string) *Server {
 	return &Server{
 		Router:      chi.NewRouter(),
@@ -35,6 +36,7 @@ func CreateNewServer(db *gorm.DB, port string, environment string) *Server {
 	}
 }
 
+// MountHandlers mounts all the handlers and middleware to the server.
 func (s *Server) MountHandlers() {
 	s.Router.Use(middleware.RequestID)
 	s.Router.Use(middleware.RealIP)
