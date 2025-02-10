@@ -1,0 +1,12 @@
+services:
+  htn-takehome-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./htn.db:/app/htn.db
+    environment:
+      - INITIAL_DATABASE_URL=https://gist.githubusercontent.com/SuperZooper3/685fe234d711a92d4f950bdfbed3bd2c/raw/38a099a5391af58d51593676310de4d2f882e97e/example_data.json
+      - ENV="development"

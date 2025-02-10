@@ -27,8 +27,8 @@ func main() {
 	})
 
 	err := godotenv.Load()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to load environment variables")
+	if err != nil && os.Getenv("ENV") == "development" {
+		log.Warn().Err(err).Msg("failed to load environment variables")
 	}
 
 	var db *gorm.DB
