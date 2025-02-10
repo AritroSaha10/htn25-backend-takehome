@@ -15,8 +15,45 @@ type ScanController struct{}
 
 func (c ScanController) Routes() chi.Router {
 	r := chi.NewRouter()
+	r.Get("/", c.GetAggregateScans)
 	r.Put("/{id}", c.ScanUser)
 	return r
+}
+
+func (c ScanController) GetAggregateScans(w http.ResponseWriter, r *http.Request) {
+	minFreqRaw, minErr := strconv.Atoi(r.URL.Query().Get("min_frequency"))
+	maxFreqRaw, maxErr := strconv.Atoi(r.URL.Query().Get("max_frequency"))
+	activityCategoryRaw := r.URL.Query().Get("activity_category")
+
+	// Change to nil if the query param is not provided
+	activityCategory := &activityCategoryRaw
+	if activityCategoryRaw == "" {
+		activityCategory = nil
+	}
+	minFreq := &minFreqRaw
+	if minErr != nil {
+		minFreq = nil
+	}
+	maxFreq := &maxFreqRaw
+	if maxErr != nil {
+		maxFreq = nil
+	}
+
+	scans, err := model.GetScanAggregates(lib.GetDB(), activityCategory, minFreq, maxFreq)
+	if err != nil {
+		render.Render(w, r, util.ErrServerRender(err))
+		return
+	}
+
+	// Convert to list of renderers
+	renderers := make([]render.Renderer, len(scans))
+	for i, scan := range scans {
+		renderers[i] = &scan
+	}
+	if err := render.RenderList(w, r, renderers); err != nil {
+		render.Render(w, r, util.ErrRender(err))
+		return
+	}
 }
 
 func (c ScanController) ScanUser(w http.ResponseWriter, r *http.Request) {
