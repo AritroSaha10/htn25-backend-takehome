@@ -20,6 +20,17 @@ func (c ScanController) Routes() chi.Router {
 	return r
 }
 
+// @Summary Get aggregate scan statistics
+// @Description Get aggregated scan statistics with optional filtering
+// @Tags scans
+// @Accept json
+// @Produce json
+// @Param min_frequency query int false "Minimum frequency filter"
+// @Param max_frequency query int false "Maximum frequency filter"
+// @Param activity_category query string false "Activity category filter"
+// @Success 200 {array} model.ScanAggregate
+// @Failure 500 {object} util.ErrResponse
+// @Router /scans [get]
 func (c ScanController) GetAggregateScans(w http.ResponseWriter, r *http.Request) {
 	minFreqRaw, minErr := strconv.Atoi(r.URL.Query().Get("min_frequency"))
 	maxFreqRaw, maxErr := strconv.Atoi(r.URL.Query().Get("max_frequency"))
@@ -56,6 +67,18 @@ func (c ScanController) GetAggregateScans(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// @Summary Record a new scan for a user
+// @Description Record a new activity scan for a user using their badge code
+// @Tags scans
+// @Accept json
+// @Produce json
+// @Param badge_code path string true "User's badge code"
+// @Param scan body model.Scan true "Scan information"
+// @Success 200 {object} model.Scan
+// @Failure 400 {object} util.ErrResponse
+// @Failure 404 {object} util.ErrResponse
+// @Failure 500 {object} util.ErrResponse
+// @Router /scans/{badge_code} [put]
 func (c ScanController) ScanUser(w http.ResponseWriter, r *http.Request) {
 	// Get the badge code from the URL parameter
 	badgeCode := chi.URLParam(r, "badge_code")

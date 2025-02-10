@@ -16,6 +16,13 @@ import (
 	"gorm.io/gorm"
 )
 
+// @title           HTN25 Backend API
+// @version         0.1
+// @description     Backend API for Hack the North 2025 Backend Challenge
+
+// @host      localhost:8080
+// @BasePath  /
+
 func main() {
 	// Configure logging. Current logging settings are best for development, but
 	// it would probably be best to log to a file in JSON format in production.

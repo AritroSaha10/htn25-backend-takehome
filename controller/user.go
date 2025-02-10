@@ -25,6 +25,14 @@ func (c UserController) Routes() chi.Router {
 	return r
 }
 
+// @Summary Get all users
+// @Description Get a list of all users in the system
+// @Tags users
+// @Accept json
+// @Produce json
+// @Success 200 {array} model.User
+// @Failure 500 {object} util.ErrResponse
+// @Router /users [get]
 func (c UserController) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := model.GetUsers(lib.GetDB())
 	if err != nil {
@@ -44,6 +52,17 @@ func (c UserController) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Get user by ID
+// @Description Get a single user by their ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} model.User
+// @Failure 400 {object} util.ErrResponse
+// @Failure 404 {object} util.ErrResponse
+// @Failure 500 {object} util.ErrResponse
+// @Router /users/{id} [get]
 func (c UserController) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	idUint, err := strconv.ParseUint(id, 10, 64)
@@ -71,6 +90,18 @@ func (c UserController) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Update user by ID
+// @Description Update a user's information by their ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Param user body model.UserUpdate true "User update information"
+// @Success 200 {object} model.User
+// @Failure 400 {object} util.ErrResponse
+// @Failure 404 {object} util.ErrResponse
+// @Failure 500 {object} util.ErrResponse
+// @Router /users/{id} [put]
 func (c UserController) UpdateUserByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	idUint, err := strconv.ParseUint(id, 10, 64)

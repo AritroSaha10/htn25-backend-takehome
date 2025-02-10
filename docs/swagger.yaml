@@ -1,0 +1,234 @@
+basePath: /
+definitions:
+  model.Scan:
+    properties:
+      activity_category:
+        type: string
+      activity_name:
+        type: string
+      id:
+        type: integer
+      scanned_at:
+        type: string
+    type: object
+  model.ScanAggregate:
+    properties:
+      activity_category:
+        type: string
+      activity_name:
+        type: string
+      frequency:
+        type: integer
+    type: object
+  model.User:
+    properties:
+      badge_code:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+      scans:
+        items:
+          $ref: '#/definitions/model.Scan'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  model.UserUpdate:
+    properties:
+      badge_code:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  util.ErrResponse:
+    properties:
+      code:
+        type: integer
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Backend API for Hack the North 2025 Backend Challenge
+  title: HTN25 Backend API
+  version: "0.1"
+paths:
+  /scans:
+    get:
+      consumes:
+      - application/json
+      description: Get aggregated scan statistics with optional filtering
+      parameters:
+      - description: Minimum frequency filter
+        in: query
+        name: min_frequency
+        type: integer
+      - description: Maximum frequency filter
+        in: query
+        name: max_frequency
+        type: integer
+      - description: Activity category filter
+        in: query
+        name: activity_category
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ScanAggregate'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ErrResponse'
+      summary: Get aggregate scan statistics
+      tags:
+      - scans
+  /scans/{badge_code}:
+    put:
+      consumes:
+      - application/json
+      description: Record a new activity scan for a user using their badge code
+      parameters:
+      - description: User's badge code
+        in: path
+        name: badge_code
+        required: true
+        type: string
+      - description: Scan information
+        in: body
+        name: scan
+        required: true
+        schema:
+          $ref: '#/definitions/model.Scan'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Scan'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ErrResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/util.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ErrResponse'
+      summary: Record a new scan for a user
+      tags:
+      - scans
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all users in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ErrResponse'
+      summary: Get all users
+      tags:
+      - users
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a single user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ErrResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/util.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ErrResponse'
+      summary: Get user by ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update a user's information by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User update information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ErrResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/util.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ErrResponse'
+      summary: Update user by ID
+      tags:
+      - users
+swagger: "2.0"
