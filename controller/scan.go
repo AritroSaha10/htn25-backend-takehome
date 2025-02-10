@@ -72,7 +72,7 @@ func (c ScanController) ScanUser(w http.ResponseWriter, r *http.Request) {
 		Limit(1).
 		Find(&user)
 	if tx.RowsAffected == 0 {
-		render.Render(w, r, util.ErrNotFoundRender(nil, "no user with given badge code exists"))
+		render.Render(w, r, util.ErrNotFoundRender("no user with given badge code exists", nil))
 		return
 	}
 

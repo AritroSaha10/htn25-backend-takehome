@@ -7,5 +7,6 @@ const (
 )
 
 var (
-	ErrNotFound = errors.New("resource not found")
+	ErrNotFound   = errors.New("resource not found")
+	ErrBadRequest = errors.New("bad request")
 )

@@ -57,7 +57,7 @@ func (c UserController) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	// Check if user was found, handle other errors appropriately
 	if errors.Is(err, util.ErrNotFound) {
 		log.Error().Str("id", id).Msg("could not find user")
-		render.Render(w, r, util.ErrNotFoundRender(err, "no user with given id exists"))
+		render.Render(w, r, util.ErrNotFoundRender("no user with given id exists", err))
 		return
 	} else if err != nil {
 		log.Error().Str("id", id).Err(err).Msg("could not fetch user")
@@ -72,7 +72,36 @@ func (c UserController) GetUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c UserController) UpdateUserByID(w http.ResponseWriter, r *http.Request) {
-	// TODO: Needs to be able to perform partial updates on user info
-	// but not scans. Make sure to keep edge cases in mind.
-	w.Write([]byte("Hello, User!"))
+	id := chi.URLParam(r, "id")
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		log.Error().Str("id", id).Err(err).Msg("could not parse id")
+		render.Render(w, r, util.ErrBadRequestRender("id is not unsigned int", err))
+		return
+	}
+
+	// Parse request body into a UserUpdate struct
+	userUpdate := model.UserUpdate{}
+	if err := render.Bind(r, &userUpdate); err != nil {
+		render.Render(w, r, util.ErrBadRequestRender("invalid request body", err))
+		return
+	}
+
+	// Update the user and handle all error cases
+	user, err := model.UpdateUserByID(lib.GetDB(), uint(idUint), userUpdate)
+	if errors.Is(err, util.ErrNotFound) {
+		render.Render(w, r, util.ErrNotFoundRender("no user with given id exists", err))
+		return
+	} else if errors.Is(err, util.ErrBadRequest) {
+		render.Render(w, r, util.ErrBadRequestRender(err.Error(), err))
+		return
+	} else if err != nil {
+		render.Render(w, r, util.ErrServerRender(err))
+		return
+	}
+
+	if err := render.Render(w, r, &user); err != nil {
+		render.Render(w, r, util.ErrRender(err))
+		return
+	}
 }

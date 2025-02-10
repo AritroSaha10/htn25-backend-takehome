@@ -31,7 +31,7 @@ func ErrBadRequestRender(reason string, err error) render.Renderer {
 	}
 }
 
-func ErrNotFoundRender(err error, reason string) render.Renderer {
+func ErrNotFoundRender(reason string, err error) render.Renderer {
 	return &ErrResponse{
 		Err:            err,
 		HTTPStatusCode: 404,

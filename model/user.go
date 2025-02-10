@@ -1,10 +1,12 @@
 package model
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/AritroSaha10/htn25-backend-takehome/util"
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
@@ -21,6 +23,18 @@ type User struct {
 	Phone     string         `json:"phone" gorm:"not null"`
 	BadgeCode string         `json:"badge_code"`
 	Scans     []Scan         `json:"scans"`
+}
+
+type UserUpdate struct {
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone"`
+	BadgeCode string `json:"badge_code"`
+}
+
+// Bind implements the render.Binder interface for UserUpdate.
+func (up *UserUpdate) Bind(r *http.Request) error {
+	return nil
 }
 
 // Render implements the render.Renderer interface for User.
@@ -44,6 +58,67 @@ func GetUserByID(db *gorm.DB, id uint) (User, error) {
 		return User{}, util.ErrNotFound
 	}
 	if result.Error != nil {
+		return User{}, result.Error
+	}
+	return user, nil
+}
+
+func UpdateUserByID(db *gorm.DB, id uint, userUpdate UserUpdate) (User, error) {
+	// Confirm the user exists
+	user := User{}
+	res := db.
+		Model(&user).
+		Where("id = ?", id).
+		Limit(1).
+		Find(&user)
+	if res.RowsAffected == 0 {
+		return User{}, util.ErrNotFound
+	}
+	if res.Error != nil {
+		return User{}, res.Error
+	}
+
+	// Forbid a user from claiming another user's email
+	if userUpdate.Email != "" {
+		otherUser := User{}
+		res := db.
+			Model(&otherUser).
+			Where("email = ?", userUpdate.Email).
+			Limit(1).
+			Find(&otherUser)
+		if res.RowsAffected != 0 {
+			return User{}, fmt.Errorf("%w: email already in use", util.ErrBadRequest)
+		}
+	}
+
+	// Forbid a user from claiming another user's badge code
+	if userUpdate.BadgeCode != "" {
+		otherUser := User{}
+		res := db.
+			Model(&otherUser).
+			Where("badge_code = ?", userUpdate.BadgeCode).
+			Limit(1).
+			Find(&otherUser)
+		if res.RowsAffected != 0 {
+			return User{}, fmt.Errorf("%w: badge code already in use", util.ErrBadRequest)
+		}
+	}
+
+	// Perform all updates to the user
+	result := db.
+		Model(&user).
+		Where("id = ?", id).
+		Updates(userUpdate)
+	if result.Error != nil {
+		log.Error().Err(result.Error).Msg("failed to update user")
+		return User{}, result.Error
+	}
+
+	// Also show the scans in the response
+	user.Scans = []Scan{}
+	result = db.Preload("Scans").Find(&user, id)
+	if result.Error != nil {
+		log.Error().Err(result.Error).Msg("failed to load scans for user")
 		return User{}, result.Error
 	}
 	return user, nil
