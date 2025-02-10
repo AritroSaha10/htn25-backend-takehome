@@ -8,6 +8,12 @@ In terms of database structure, I have two models: `User` and `Scan`. The `User`
 
 As specified in the challenge, the backend also keeps track of the last updated time for each user. This is mainly handled by GORM since it already keeps track of such a field, but it is also manually updated in the `CreateScan` function.
 
+## Improvements
+Unfortunately, while I was able to complete the required features, I was unable to add anything else due to personal time constraints. However, here are some of my ideas for improvements:
+- Switch to using a UUID for the `User` model's ID field instead of an auto-incrementing integer. This would make it harder for others to guess the IDs of users, and would also make the API more secure.
+- Add endpoints to add and delete users.
+- Implement all of the potential ideas listed in the challenge.
+
 ## Setup
 
 1. Clone the repository
