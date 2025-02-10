@@ -57,7 +57,7 @@ func (c UserController) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	// Check if user was found, handle other errors appropriately
 	if errors.Is(err, util.ErrNotFound) {
 		log.Error().Str("id", id).Msg("could not find user")
-		render.Render(w, r, util.ErrNotFoundRender(err))
+		render.Render(w, r, util.ErrNotFoundRender(err, "no user with given id exists"))
 		return
 	} else if err != nil {
 		log.Error().Str("id", id).Err(err).Msg("could not fetch user")

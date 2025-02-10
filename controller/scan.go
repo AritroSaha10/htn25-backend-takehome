@@ -16,7 +16,7 @@ type ScanController struct{}
 func (c ScanController) Routes() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/", c.GetAggregateScans)
-	r.Put("/{id}", c.ScanUser)
+	r.Put("/{badge_code}", c.ScanUser)
 	return r
 }
 
@@ -57,24 +57,28 @@ func (c ScanController) GetAggregateScans(w http.ResponseWriter, r *http.Request
 }
 
 func (c ScanController) ScanUser(w http.ResponseWriter, r *http.Request) {
-	// Get the user ID from the URL parameter
-	id := chi.URLParam(r, "id")
-	idUint64, err := strconv.ParseUint(id, 10, 64)
-	if err != nil {
-		render.Render(w, r, util.ErrBadRequestRender("id is not unsigned int", err))
+	// Get the badge code from the URL parameter
+	badgeCode := chi.URLParam(r, "badge_code")
+	if badgeCode == "" {
+		render.Render(w, r, util.ErrBadRequestRender("badge code is required", nil))
 		return
 	}
-	idUint := uint(idUint64)
 
-	// Check if the user exists
-	if lib.GetDB().Where("id = ?", idUint).Limit(1).Find(&model.User{}).RowsAffected == 0 {
-		render.Render(w, r, util.ErrBadRequestRender("user does not exist", nil))
+	// Find user with given badge code
+	user := model.User{}
+	tx := lib.
+		GetDB().
+		Where("badge_code = ?", badgeCode).
+		Limit(1).
+		Find(&user)
+	if tx.RowsAffected == 0 {
+		render.Render(w, r, util.ErrNotFoundRender(nil, "no user with given badge code exists"))
 		return
 	}
 
 	// Parse request body into a Scan struct
 	scan := model.Scan{
-		UserID: idUint,
+		UserID: user.ID,
 	}
 	if err := render.Bind(r, &scan); err != nil {
 		render.Render(w, r, util.ErrBadRequestRender("invalid request body", err))
@@ -82,7 +86,7 @@ func (c ScanController) ScanUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add scan to database
-	err = model.CreateScan(lib.GetDB(), &scan)
+	err := model.CreateScan(lib.GetDB(), &scan)
 	if err != nil {
 		render.Render(w, r, util.ErrServerRender(err))
 		return

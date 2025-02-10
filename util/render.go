@@ -31,11 +31,12 @@ func ErrBadRequestRender(reason string, err error) render.Renderer {
 	}
 }
 
-func ErrNotFoundRender(err error) render.Renderer {
+func ErrNotFoundRender(err error, reason string) render.Renderer {
 	return &ErrResponse{
 		Err:            err,
 		HTTPStatusCode: 404,
 		StatusText:     "Not Found.",
+		ErrorText:      reason,
 	}
 }
 
