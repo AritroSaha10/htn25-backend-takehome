@@ -47,11 +47,18 @@ func (s *ScanAggregate) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// CreateScan creates a new scan in the database.
+// CreateScan creates a new scan in the database. This assumes the given user ID is valid,
+// and should be handled by the caller.
 func CreateScan(db *gorm.DB, scan *Scan) error {
 	scan.ScannedAt = time.Now()
-	if err := db.Create(&scan).Error; err != nil {
+	if err := db.Create(scan).Error; err != nil {
 		return err
+	}
+
+	// Make sure to also update User's updated field
+	tx := db.Model(&User{}).Where("id = ?", scan.UserID).Update("updated_at", time.Now())
+	if tx.Error != nil {
+		return tx.Error
 	}
 	return nil
 }
