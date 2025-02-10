@@ -1,6 +1,8 @@
 # Hack the North 2025 Backend Challenge
 
-This is my backend API for the take-home assignment! For my tech stack, I used Go, SQLite w/ GORM, and Chi. I decided to use SQLite because it's a lightweight database that's easy to set up and use (and it was also recommended), and GORM because it made database interaction simple. Furthermore, I used Chi since I like the ability to mount multiple routers on a single server, which allows me to organize controllers more easily.
+This is my backend API for the take-home assignment! 
+
+For my tech stack, I used Go, SQLite w/ GORM, and Chi. I decided to use SQLite because it's a lightweight database that's easy to set up and use (and it was also recommended), and GORM because it made database interaction simple. Furthermore, I used Chi since I like the ability to mount multiple routers on a single server, which allows me to organize controllers more easily.
 
 For assumptions, I didn't assume too much other than the clarifications given to us (ex. times given in ISO 8601, emails & badge codes are unique, etc.). I otherwise try account for anything else that was unclear. For example, I account for empty badge codes by keeping it as a nullable field in the database.
 
@@ -8,11 +10,16 @@ In terms of database structure, I have two models: `User` and `Scan`. The `User`
 
 As specified in the challenge, the backend also keeps track of the last updated time for each user. This is mainly handled by GORM since it already keeps track of such a field, but it is also manually updated in the `CreateScan` function.
 
+## Deployment
+You can access the live API at `https://htn25-backend-takehome.onrender.com`.
+
 ## Improvements
 Unfortunately, while I was able to complete the required features, I was unable to add anything else due to personal time constraints. However, here are some of my ideas for improvements:
 - Switch to using a UUID for the `User` model's ID field instead of an auto-incrementing integer. This would make it harder for others to guess the IDs of users, and would also make the API more secure.
 - Add endpoints to add and delete users.
 - Implement all of the potential ideas listed in the challenge.
+
+I'm thinking of adding these over time since this is a good exercise to improve my skills, so this list may change.
 
 ## Setup
 
