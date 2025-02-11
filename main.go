@@ -49,13 +49,6 @@ func main() {
 		log.Fatal().Err(err).Msg("failed to import initial data")
 	}
 
-	// Print out all users
-	users := []model.User{}
-	db.Find(&users)
-	for _, user := range users {
-		log.Info().Any("user", user).Msg("user in db")
-	}
-
 	// Initialize and start server
 	port := os.Getenv("PORT")
 	if port == "" {
